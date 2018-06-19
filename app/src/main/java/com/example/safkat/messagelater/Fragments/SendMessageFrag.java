@@ -16,8 +16,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import android.net.Uri;
@@ -27,6 +29,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -69,6 +72,14 @@ public class SendMessageFrag extends Fragment implements View.OnClickListener{
 
 
     private static final int PICK_CONTACT=1;
+    public static final int MULTIPLE_PERMISSIONS = 10;
+
+    String[] permissions= new String[]{
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.READ_CONTACTS};
 
     public SendMessageFrag() {
 
@@ -95,10 +106,14 @@ public class SendMessageFrag extends Fragment implements View.OnClickListener{
         timePickerShowTextView.setOnClickListener(this);
         datePickerShowTextView.setOnClickListener(this);
         browse.setOnClickListener(this);
-
         send.setOnClickListener(this);
 
         InitiateTimeAndDate();
+
+        if (checkPermissions()){
+
+        }
+
         return rootView;
     }
 
@@ -133,7 +148,6 @@ public class SendMessageFrag extends Fragment implements View.OnClickListener{
                 numberEditText.setHintTextColor(Color.RED);
 
             }
-
 
         }
         if(v.getId()==R.id.browse) {
@@ -270,6 +284,23 @@ public class SendMessageFrag extends Fragment implements View.OnClickListener{
         }
     }
 
+    //check permission
+    private  boolean checkPermissions() {
+        int result;
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String p:permissions) {
+            result = ContextCompat.checkSelfPermission(getContext(),p);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
+            }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(getActivity(), listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),MULTIPLE_PERMISSIONS );
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
@@ -293,6 +324,21 @@ public class SendMessageFrag extends Fragment implements View.OnClickListener{
                     return;
                 }
                 break;
+
+            case MULTIPLE_PERMISSIONS:{
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    // permissions granted.
+                } else {
+                    String permission = "";
+                    for (String per : permissions) {
+                        permission += "\n" + per;
+                    }
+
+                    Log.d("permissions", "onRequestPermissionsResult: "+permission);
+                    // permissions list of don't granted permission
+                }
+                return;
+            }
         }
     }
 

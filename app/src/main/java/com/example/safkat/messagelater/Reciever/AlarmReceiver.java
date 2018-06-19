@@ -1,10 +1,12 @@
 package com.example.safkat.messagelater.Reciever;
 
 
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.database.sqlite.SQLiteDatabase;
@@ -40,18 +42,28 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(num, null, msg, null, null);
-           // Toast.makeText(context, "Sms sent!", Toast.LENGTH_SHORT).show();
             SendNotificationToTheUi(context);
             DeleteLogFromDatabse(u_id, context);
 
         }catch (Exception e) {
-            Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
+           // Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
             Log.e("sms Error",e.toString());
+            Dialog dialog = new Dialog(context);
+
+            android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
+
+            builder.setMessage("Please allow all the required permissions")
+                    .setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            System.exit(0);
+                        }
+                    });
+
+            dialog = builder.create();
+            dialog.show();
+            dialog.setCancelable(false);
         }
-
-       // Toast.makeText(context, "done!"+num, Toast.LENGTH_LONG).show();
-      //  Toast.makeText(context, "time"+(System.currentTimeMillis()/1000)/60, Toast.LENGTH_LONG).show();
-
 
     }
 
